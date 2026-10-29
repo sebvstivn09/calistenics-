@@ -1,10 +1,10 @@
 {
-  "name": "FULL BODY HOME PRO V5",
+  "name": "FULL BODY HOME PRO V6",
   "short_name": "FB HOME PRO",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#07101d",
-  "theme_color": "#0b1220",
+  "background_color": "#07101c",
+  "theme_color": "#08111f",
   "lang": "ro",
   "icons": [
     {
