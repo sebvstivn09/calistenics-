@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b1220">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>FULL BODY HOME PRO V4</title>
+<title>FULL BODY HOME PRO V5</title>
 <style>
 :root{--bg:#07101d;--card:#111c2d;--card2:#16243a;--line:#263852;--text:#f8fafc;--muted:#9fb0c6;--blue:#3b82f6;--green:#22c55e}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -33,7 +33,7 @@ h2{font-size:19px;margin:0 0 8px} h3{font-size:16px;margin:0}
 .badge{font-size:12px;color:#93c5fd;margin-top:4px}
 .done{background:#16452a!important;color:#b9f7c9!important}
 .action{background:var(--blue);padding:10px 12px;border-radius:11px;font-weight:800;white-space:nowrap}
-.secondary{background:#24334a;padding:10px 12px;border-radius:11px;font-weight:800}
+.secondary{background:#24334a;padding:10px 12px;border-radius:11px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .exercise-detail{display:none;margin-top:10px}
 .exercise.open .exercise-detail{display:block}
 .tip{background:#0d1727;border:1px solid #253650;border-radius:12px;padding:11px;margin-top:9px;font-size:13px;color:#c7d4e6;line-height:1.45}
@@ -62,7 +62,7 @@ select{width:100%;background:#0b1423;color:white;border:1px solid #2a3a52;border
 </head>
 <body>
 <header class="top"><div class="container">
-<div class="brand">FULL BODY HOME PRO V4</div>
+<div class="brand">FULL BODY HOME PRO V5</div>
 <div class="sub">V4 • timer rapid + video pentru fiecare exercițiu</div>
 <div class="tabs" id="tabs"></div>
 </div></header>
@@ -171,11 +171,11 @@ const videoMap = {
   "Flexii biceps":"https://www.youtube.com/results?search_query=dumbbell+biceps+curl+proper+form+tutorial"
 };
 
-let currentDay = Number(localStorage.getItem('fbv3_day') || 0);
+let currentDay = Number(localStorage.getItem('fbv5_day') || 0);
 let timer = 60, interval = null;
 const todayKey = new Date().toISOString().slice(0,10);
 
-function dayKey(){ return 'fbv3_'+todayKey+'_d'+currentDay; }
+function dayKey(){ return 'fbv5_'+todayKey+'_d'+currentDay; }
 function getDone(){ return JSON.parse(localStorage.getItem(dayKey()) || '[]'); }
 function saveDone(a){ localStorage.setItem(dayKey(), JSON.stringify(a)); }
 
@@ -183,7 +183,7 @@ function renderTabs(){
  const el=document.getElementById('tabs'); el.innerHTML='';
  workouts.forEach((w,i)=>{
   const b=document.createElement('button'); b.textContent='Ziua '+(i+1); b.className=i===currentDay?'on':'';
-  b.onclick=()=>{currentDay=i;localStorage.setItem('fbv3_day',i);render();window.scrollTo({top:0,behavior:'smooth'})};
+  b.onclick=()=>{currentDay=i;localStorage.setItem('fbv5_day',i);render();window.scrollTo({top:0,behavior:'smooth'})};
   el.appendChild(b);
  });
 }
@@ -201,16 +201,15 @@ function render(){
   <button class="action ${done.includes(i)?'done':''}" onclick="complete(${i},this)">${done.includes(i)?'✓ GATA':'SERIE +1'}</button></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px">
   <button class="secondary" onclick="toggleDetail(this)">VEZI EXECUȚIA</button>
-  <button class="secondary video" onclick="openVideo(${JSON.stringify(e[0])})"><span class="videoicon">▶</span>VIDEO</button>
+  <a class="secondary video" href="${videoMap[e[0]] || ('https://www.youtube.com/results?search_query='+encodeURIComponent(e[0]+' proper form tutorial'))}" target="_blank" rel="noopener noreferrer"><span class="videoicon">▶</span>VIDEO</a>
 </div>
   <div class="exercise-detail"><div class="tip">${e[3]}</div></div>`;
   list.appendChild(div);
  });
  updateStats();
- document.getElementById('notes').value=localStorage.getItem('fbv3_notes_d'+currentDay)||'';
+ document.getElementById('notes').value=localStorage.getItem('fbv5_notes_d'+currentDay)||'';
 }
-function toggleDetail(btn){ const ex=btn.parentElement; ex.classList.toggle('open'); btn.textContent=ex.classList.contains('open')?'ASCUNDE EXECUȚIA':'VEZI EXECUȚIA'; }
-function openVideo(name){ const url=videoMap[name] || ('https://www.youtube.com/results?search_query='+encodeURIComponent(name+' proper form tutorial')); window.open(url,'_blank','noopener'); }
+function toggleDetail(btn){ const ex=btn.closest('.exercise'); if(!ex)return; ex.classList.toggle('open'); btn.textContent=ex.classList.contains('open')?'ASCUNDE EXECUȚIA':'VEZI EXECUȚIA'; }
 function complete(i,btn){
  let a=getDone();
  const wasDone=a.includes(i);
@@ -236,7 +235,7 @@ function startTimer(){
 }
 function pauseTimer(){clearInterval(interval);interval=null}
 function resetTimer(){pauseTimer();timer=60;renderTimer()}
-function saveNotes(){localStorage.setItem('fbv3_notes_d'+currentDay,document.getElementById('notes').value);alert('Notițele au fost salvate.')}
+function saveNotes(){localStorage.setItem('fbv5_notes_d'+currentDay,document.getElementById('notes').value);alert('Notițele au fost salvate.')}
 
 render(); renderTimer();
 </script>
