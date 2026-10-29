@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FULL BODY HOME PRO V3</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root{--bg:#07101d;--card:#111c2d;--card2:#16243a;--line:#263852;--text:#f8fafc;--muted:#9fb0c6;--blue:#3b82f6;--green:#22c55e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.top{padding:calc(18px + env(safe-area-inset-top)) 16px 16px;background:linear-gradient(150deg,#0e1b31,#142b50);position:sticky;top:0;z-index:10;box-shadow:0 5px 20px #0006}
+.container{max-width:760px;margin:auto}
+.brand{font-size:25px;font-weight:900;letter-spacing:-.5px}
+.sub{font-size:13px;color:#b9c8db;margin-top:4px}
+.tabs{display:flex;gap:7px;overflow:auto;padding-top:14px;scrollbar-width:none}
+.tabs button{white-space:nowrap;padding:10px 13px;border-radius:12px;background:#1c2b43;color:#dce7f5;font-weight:800}
+.tabs button.on{background:var(--blue);color:white}
+main{padding:14px 16px 50px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
+.hero{background:linear-gradient(145deg,#142642,#0e1727)}
+h2{font-size:19px;margin:0 0 8px} h3{font-size:16px;margin:0}
+.muted{color:var(--muted);font-size:13px;line-height:1.45}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--card2);border-radius:13px;padding:12px;text-align:center}
+.stat b{display:block;font-size:22px;margin-bottom:3px}
+.exercise{border-top:1px solid var(--line);padding:15px 0}
+.exercise:first-child{border-top:0}
+.row{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.badge{font-size:12px;color:#93c5fd;margin-top:4px}
+.done{background:#16452a!important;color:#b9f7c9!important}
+.action{background:var(--blue);padding:10px 12px;border-radius:11px;font-weight:800;white-space:nowrap}
+.secondary{background:#24334a;padding:10px 12px;border-radius:11px;font-weight:800}
+.exercise-detail{display:none;margin-top:10px}
+.exercise.open .exercise-detail{display:block}
+.tip{background:#0d1727;border:1px solid #253650;border-radius:12px;padding:11px;margin-top:9px;font-size:13px;color:#c7d4e6;line-height:1.45}
+.timer{font-size:55px;text-align:center;font-weight:900;letter-spacing:2px;margin:8px 0}
+.timergrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.full{width:100%;margin-top:8px}
+.progress{height:8px;background:#223148;border-radius:99px;overflow:hidden;margin-top:12px}
+.bar{height:100%;background:var(--green);width:0%;transition:.2s}
+textarea{width:100%;height:100px;background:#0b1423;color:white;border:1px solid #2a3a52;border-radius:12px;padding:12px;resize:vertical}
+select{width:100%;background:#0b1423;color:white;border:1px solid #2a3a52;border-radius:12px;padding:12px}
+.hidden{display:none}
+.notice{border-left:4px solid var(--blue);padding-left:12px}
+</style>
+</head>
+<body>
+<header class="top"><div class="container">
+<div class="brand">FULL BODY HOME PRO V3</div>
+<div class="sub">Program complet pentru antrenament acasă</div>
+<div class="tabs" id="tabs"></div>
+</div></header>
+<main class="container">
+<div class="card hero">
+<h2 id="dayTitle"></h2>
+<p class="muted" id="dayDesc"></p>
+<div class="stats">
+<div class="stat"><b id="exerciseCount">0</b><span class="muted">exerciții</span></div>
+<div class="stat"><b id="completed">0</b><span class="muted">serii azi</span></div>
+<div class="stat"><b id="dayProgress">0%</b><span class="muted">progres</span></div>
+</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+</div>
+
+<div class="card">
+<h2>Încălzire — 6–8 minute</h2>
+<p class="muted">2 min jumping jacks • 10 rotații umeri • 10 genuflexiuni • 10 scapular push-ups • 20–30 sec dead hang • mobilitate încheieturi.</p>
+</div>
+
+<section class="card">
+<h2>Exercițiile zilei</h2>
+<div id="exerciseList"></div>
+</section>
+
+<section class="card">
+<h2>Timer pentru pauză</h2>
+<div class="timer" id="timer">60</div>
+<div class="timergrid">
+<button class="secondary" onclick="setTimer(30)">30s</button>
+<button class="secondary" onclick="setTimer(60)">60s</button>
+<button class="secondary" onclick="setTimer(90)">90s</button>
+<button class="secondary" onclick="setTimer(120)">120s</button>
+</div>
+<button class="action full" onclick="startTimer()">START</button>
+<button class="secondary full" onclick="pauseTimer()">PAUZĂ</button>
+<button class="secondary full" onclick="resetTimer()">RESET</button>
+</section>
+
+<section class="card">
+<h2>Notițe antrenament</h2>
+<textarea id="notes" placeholder="Greutăți, repetări, cum te-ai simțit..."></textarea>
+<button class="action full" onclick="saveNotes()">SALVEAZĂ NOTIȚELE</button>
+</section>
+
+<section class="card notice">
+<h2>Regulă de progres</h2>
+<p class="muted">Când atingi limita superioară a intervalului de repetări la toate seriile, crește ușor dificultatea: mai multă greutate, tempo mai lent, amplitudine mai mare sau o variație mai grea.</p>
+</section>
+</main>
+
+<script>
+const workouts = [["ZIUA 1 — FULL BODY A", [["Tracțiuni la bară", "4 × 6–10", "Spate + biceps", "Priză puțin mai largă decât umerii. Pornește din atârnat controlat, trage pieptul spre bară și evită balansul."], ["Flotări la paralele", "4 × 8–15", "Piept + triceps", "Coboară controlat, menține trunchiul rigid și împinge puternic în paralele."], ["Goblet squat", "4 × 10–15", "Cvadricepși + fesieri", "Ține gantera la piept. Coboară cu genunchii pe direcția vârfurilor și urcă prin talpă."], ["Ramat la inele", "3 × 8–12", "Spate", "Corpul drept. Trage sternul spre inele și strânge omoplații."], ["Îndreptări românești", "3 × 10–12", "Femurali + fesieri", "Împinge șoldurile înapoi, păstrează spatele neutru și ganterele aproape de picioare."], ["Ab wheel", "3 × 8–15", "Core", "Rulează doar până unde poți păstra bazinul controlat și lombarul neutru."]]], ["ZIUA 2 — FULL BODY B", [["Tracțiuni supinație", "4 × 6–10", "Spate + biceps", "Palmele spre tine. Trage cu coatele în jos și nu folosi impulsul."], ["Pike push-up", "4 × 6–12", "Umeri + triceps", "Șoldurile sus, capul coboară înaintea mâinilor. Împinge activ din umeri."], ["Bulgarian split squat", "3 × 8–12 / picior", "Picioare", "Piciorul din spate pe un suport stabil. Coboară vertical și menține genunchiul controlat."], ["Dips la paralele", "3 × 6–12", "Piept + triceps", "Coboară doar în amplitudinea fără disconfort și menține umerii stabili."], ["Hammer curl", "3 × 10–15", "Biceps + antebraț", "Priză neutră, coatele fixe, fără balans."], ["Plank", "3 × 40–60 sec", "Core", "Strânge abdomenul și fesierii; nu lăsa bazinul să cadă."]]], ["ZIUA 3 — GIMNASTICĂ + MOBILITATE", [["Handstand la perete", "5 × 20–40 sec", "Skill", "Mâinile sub umeri, împinge podeaua și menține coastele controlate."], ["Tranziție muscle-up la inele", "5 × 3–5", "Skill", "Folosește o asistență ușoară. Exersează trecerea din tracțiune în sprijin."], ["False grip hang", "4 × 15–30 sec", "Priză", "Încheietura stă peste inel. Menține umerii activi."], ["Scapular pull-up", "3 × 8–12", "Control scapular", "Brațele rămân întinse; mișcă omoplații fără să îndoi coatele."], ["Deep squat hold", "3 × 45–60 sec", "Mobilitate șold/gleznă", "Călcâiele rămân jos și respirația este lentă."], ["Mobilitate umeri + încheieturi", "8–10 min", "Mobilitate", "Mișcări lente, fără durere și fără forțare."]]], ["ZIUA 4 — FULL BODY C", [["Tracțiuni la inele", "4 × 6–10", "Spate + biceps", "Lasă mâinile să se rotească natural și menține corpul rigid."], ["Flotări cu picioarele ridicate", "4 × 8–15", "Piept + umeri", "Corpul drept; coboară pieptul controlat."], ["Fandări cu gantere", "3 × 10–12 / picior", "Cvadricepși + fesieri", "Pas controlat, genunchiul urmărește vârful piciorului."], ["Ramat cu gantera", "3 × 10–12 / braț", "Spate", "Trage cotul spre șold și evită rotirea trunchiului."], ["Ridicări pe vârfuri", "4 × 15–25", "Gambe", "Pauză o secundă sus și coborâre lentă."], ["Hanging knee raise", "3 × 10–15", "Abdomen", "Ridică genunchii și rulează ușor bazinul spre coaste."]]], ["ZIUA 5 — FULL BODY D / OPȚIONAL", [["Pull-up", "4 × 5–10", "Spate", "Repetări curate. Dacă nu mai poți păstra forma, oprește seria."], ["Dips", "4 × 6–12", "Piept + triceps", "Amplitudine controlată, fără prăbușirea umerilor."], ["Goblet squat tempo", "4 × 12–15", "Picioare", "3 secunde coborâre, scurtă pauză jos, urcare controlată."], ["Romanian deadlift", "3 × 10–12", "Femurali + fesieri", "Șoldurile înapoi, genunchii ușor flexați."], ["Flexii biceps", "3 × 10–15", "Biceps", "Mișcare completă și fără balans."], ["Ab wheel", "3 × 8–15", "Core", "Controlează revenirea și nu sacrifica poziția lombară."]]]];
+let currentDay = Number(localStorage.getItem('fbv3_day') || 0);
+let timer = 60, interval = null;
+const todayKey = new Date().toISOString().slice(0,10);
+
+function dayKey(){ return 'fbv3_'+todayKey+'_d'+currentDay; }
+function getDone(){ return JSON.parse(localStorage.getItem(dayKey()) || '[]'); }
+function saveDone(a){ localStorage.setItem(dayKey(), JSON.stringify(a)); }
+
+function renderTabs(){
+ const el=document.getElementById('tabs'); el.innerHTML='';
+ workouts.forEach((w,i)=>{
+  const b=document.createElement('button'); b.textContent='Ziua '+(i+1); b.className=i===currentDay?'on':'';
+  b.onclick=()=>{currentDay=i;localStorage.setItem('fbv3_day',i);render();window.scrollTo({top:0,behavior:'smooth'})};
+  el.appendChild(b);
+ });
+}
+function render(){
+ renderTabs();
+ const w=workouts[currentDay];
+ document.getElementById('dayTitle').textContent=w[0];
+ document.getElementById('dayDesc').textContent=currentDay===2?'Zi dedicată skill-urilor de gimnastică, tranziției muscle-up și mobilității.':'Lucrează cu 1–2 repetări în rezervă la majoritatea seriilor.';
+ document.getElementById('exerciseCount').textContent=w[1].length;
+ const list=document.getElementById('exerciseList'); list.innerHTML='';
+ const done=getDone();
+ w[1].forEach((e,i)=>{
+  const div=document.createElement('div'); div.className='exercise';
+  div.innerHTML=`<div class="row"><div><h3>${e[0]}</h3><div class="badge">${e[1]} • ${e[2]}</div></div>
+  <button class="action ${done.includes(i)?'done':''}" onclick="complete(${i},this)">${done.includes(i)?'✓ GATA':'SERIE +1'}</button></div>
+  <button class="secondary" style="margin-top:9px" onclick="toggleDetail(this)">VEZI EXECUȚIA</button>
+  <div class="exercise-detail"><div class="tip">${e[3]}</div></div>`;
+  list.appendChild(div);
+ });
+ updateStats();
+ document.getElementById('notes').value=localStorage.getItem('fbv3_notes_d'+currentDay)||'';
+}
+function toggleDetail(btn){ const ex=btn.parentElement; ex.classList.toggle('open'); btn.textContent=ex.classList.contains('open')?'ASCUNDE EXECUȚIA':'VEZI EXECUȚIA'; }
+function complete(i,btn){
+ let a=getDone();
+ if(a.includes(i)) a=a.filter(x=>x!==i); else a.push(i);
+ saveDone(a); render();
+}
+function updateStats(){
+ const n=getDone().length, total=workouts[currentDay][1].length, pct=Math.round(n/total*100);
+ document.getElementById('completed').textContent=n;
+ document.getElementById('dayProgress').textContent=pct+'%';
+ document.getElementById('bar').style.width=pct+'%';
+}
+function setTimer(n){timer=n;renderTimer()}
+function renderTimer(){document.getElementById('timer').textContent=String(timer).padStart(2,'0')}
+function startTimer(){
+ if(interval)return;
+ interval=setInterval(()=>{if(timer>0){timer--;renderTimer()}else{pauseTimer(); if(navigator.vibrate)navigator.vibrate([250,100,250])}},1000);
+}
+function pauseTimer(){clearInterval(interval);interval=null}
+function resetTimer(){pauseTimer();timer=60;renderTimer()}
+function saveNotes(){localStorage.setItem('fbv3_notes_d'+currentDay,document.getElementById('notes').value);alert('Notițele au fost salvate.')}
+
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+render(); renderTimer();
+</script>
+</body>
+</html>
