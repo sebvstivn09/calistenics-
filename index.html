@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#08111f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>FULL BODY HOME PRO V6</title>
+<title>FULL BODY HOME PRO V7 — BVB EDITION</title>
 <style>
 :root{--bg:#07101c;--card:#101b2b;--card2:#152338;--line:#263850;--text:#f5f7fb;--muted:#9fb0c5;--blue:#3b82f6;--green:#22c55e;--orange:#f59e0b;--red:#ef4444}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -43,8 +43,8 @@ textarea{width:100%;min-height:90px;background:#0b1423;color:#fff;border:1px sol
 </head>
 <body>
 <header class="top"><div class="container">
-<div class="brand">FULL BODY HOME PRO V6</div>
-<div class="sub">Calisthenics + echipament acasă • progres • recuperare</div>
+<div class="brand">FULL BODY HOME PRO V7</div>
+<div class="sub">FULL BODY • calisthenics + echipament acasă • progres</div>
 <div class="tabs" id="tabs"></div>
 </div></header>
 
@@ -130,14 +130,13 @@ const workouts = [
 ["Hammer curl","3 × 10–15","Biceps + antebraț","Priză neutră, coatele fixe, fără balans.",60],
 ["Plank","3 × 40–60 sec","Core","Strânge abdomenul și fesierii; nu lăsa bazinul să cadă.",60]
 ]],
-["ZIUA 3 — GIMNASTICĂ + MOBILITATE","Zi de skill: tehnică, control și mobilitate. Intensitatea rămâne moderată.",[
-["Handstand la perete","5 × 20–40 sec","Skill","Mâinile sub umeri, împinge podeaua și menține coastele controlate.",60],
-["Tranziție muscle-up la inele","5 × 3–5","Skill","Folosește asistență ușoară. Exersează trecerea din tracțiune în sprijin.",90],
-["False grip hang","4 × 15–30 sec","Priză","Încheietura stă peste inel. Menține umerii activi.",60],
-["Scapular pull-up","3 × 8–12","Control scapular","Brațele rămân întinse; mișcă omoplații fără să îndoi coatele.",60],
-["Pistol squat asistat","3 × 5–8 / picior","Skill picioare","Ține-te ușor de un suport și controlează coborârea.",75],
-["Deep squat hold","3 × 45–60 sec","Mobilitate","Călcâiele rămân jos și respirația este lentă.",45],
-["Mobilitate umeri + încheieturi","1 × 8–10 min","Mobilitate","Mișcări lente, fără durere și fără forțare.",30]
+["ZIUA 3 — FULL BODY C","Full body echilibrat cu accent pe împins, tras, picioare, gambe și core.",[
+["Tracțiuni la bară","4 × 6–10","Spate + biceps","Repetări controlate, fără balans. Dacă forma scade, oprește seria.",90],
+["Flotări la inele","4 × 8–15","Piept + triceps","Menține inelele stabile și coboară controlat. Corpul rămâne rigid.",75],
+["Bulgarian split squat","3 × 8–12 / picior","Picioare","Coboară controlat și împinge prin piciorul din față.",75],
+["Ramat cu gantera","3 × 10–12 / braț","Spate","Trage cotul spre șold și evită rotirea trunchiului.",75],
+["Ridicări pe vârfuri","4 × 15–25","Gambe","Pauză o secundă sus și coborâre lentă.",60],
+["Ab wheel","3 × 8–15","Core","Rulează doar cât poți menține abdomenul și lombarul controlate.",75]
 ]],
 ["ZIUA 4 — FULL BODY C","Full body cu accent pe inele, împins, unilateral, gambe și abdomen.",[
 ["Tracțiuni la inele","4 × 6–10","Spate + biceps","Lasă mâinile să se rotească natural și menține corpul rigid.",90],
@@ -190,17 +189,42 @@ const videoMap={
 "Flexii biceps":"https://www.youtube.com/results?search_query=dumbbell+biceps+curl+proper+form"
 };
 
-let currentDay=Number(localStorage.getItem("fbv6_day")||0);
+// Progresul seriilor este legat de ZIUA DE ANTRENAMENT, nu de data calendaristică.
+// Astfel, dacă sari o zi, progresul celorlalte zile rămâne intact și nu ești trimis înapoi.
+const dayOfWeek=(new Date().getDay()+6)%7;
+const plannedDayMap=[0,1,null,2,3,null,4];
+const savedDay=Number(localStorage.getItem("fbv6_day"));
+let currentDay=Number.isInteger(savedDay)&&savedDay>=0&&savedDay<workouts.length?savedDay:(plannedDayMap[dayOfWeek]??0);
 let globalRest=90, globalInterval=null, globalRemaining=90;
-const keyBase=()=>`fbv6_${new Date().toISOString().slice(0,10)}_d${currentDay}`;
-const setKey=i=>`${keyBase()}_e${i}`;
+const progressBase=()=>`fbv6_progress_d${currentDay}`;
+const sessionBase=()=>`fbv6_${new Date().toISOString().slice(0,10)}_d${currentDay}`;
+const keyBase=sessionBase;
+const setKey=i=>`${progressBase()}_e${i}`;
 function parseSets(p){const m=p.match(/(\d+)\s*×/);return m?Number(m[1]):1}
-function getExerciseSets(i){return JSON.parse(localStorage.getItem(setKey(i))||"[]")}
+function getExerciseSets(i){try{return JSON.parse(localStorage.getItem(setKey(i))||"[]")}catch{return []}}
 function saveExerciseSets(i,a){localStorage.setItem(setKey(i),JSON.stringify(a))}
-function getRating(){return Number(localStorage.getItem(keyBase()+"_rating")||0)}
-function getNotes(){return localStorage.getItem(keyBase()+"_notes")||""}
-function history(){return JSON.parse(localStorage.getItem("fbv6_history")||"[]")}
+function getRating(){return Number(localStorage.getItem(sessionBase()+"_rating")||0)}
+function getNotes(){return localStorage.getItem(sessionBase()+"_notes")||""}
+function history(){try{return JSON.parse(localStorage.getItem("fbv6_history")||"[]")}catch{return []}}
 function saveHistory(a){localStorage.setItem("fbv6_history",JSON.stringify(a))}
+
+// Migrare automată a progresului vechi, care era salvat pe data calendaristică.
+(function migrateOldProgress(){
+  for(let d=0;d<workouts.length;d++){
+    const target=`fbv6_progress_d${d}`;
+    for(let i=0;i<workouts[d][2].length;i++){
+      const targetKey=`${target}_e${i}`;
+      if(localStorage.getItem(targetKey)!==null) continue;
+      let newest=null;
+      for(let k=0;k<localStorage.length;k++){
+        const key=localStorage.key(k);
+        if(!key || !key.endsWith(`_d${d}_e${i}`)) continue;
+        try{const val=JSON.parse(localStorage.getItem(key)||"null");if(Array.isArray(val)) newest=val}catch{}
+      }
+      if(newest) localStorage.setItem(targetKey,JSON.stringify(newest));
+    }
+  }
+})();
 
 const dayNames=["Lun","Mar","Mie","Joi","Vin","Sâm","Dum"];
 function renderWeek(){
@@ -210,7 +234,7 @@ function renderWeek(){
  plan.forEach((p,i)=>{
   const b=document.createElement("button");b.className=(i===today?"today ":"")+(p==="ODIHNĂ"?"rest":"");
   b.innerHTML=`<b>${dayNames[i]}</b><br>${p}`;
-  if(p!=="ODIHNĂ"){const d=["ZIUA 1 — FULL BODY A","ZIUA 2 — FULL BODY B","","ZIUA 3 — GIMNASTICĂ + MOBILITATE","ZIUA 4 — FULL BODY C","","ZIUA 5 — FULL BODY D / OPȚIONAL"][i];b.onclick=()=>{currentDay=["D1","D2","","D3","D4","","D5"].indexOf(p);localStorage.setItem("fbv6_day",currentDay);render();window.scrollTo({top:0,behavior:"smooth"})}}else b.onclick=()=>alert("Zi de odihnă. Fă doar mobilitate ușoară dacă te simți bine.");
+  if(p!=="ODIHNĂ"){const d=["ZIUA 1 — FULL BODY A","ZIUA 2 — FULL BODY B","","ZIUA 3 — FULL BODY C","ZIUA 4 — FULL BODY D","","ZIUA 5 — FULL BODY E / OPȚIONAL"][i];b.onclick=()=>{currentDay=["D1","D2","","D3","D4","","D5"].indexOf(p);localStorage.setItem("fbv6_day",currentDay);render();window.scrollTo({top:0,behavior:"smooth"})}}else b.onclick=()=>alert("Zi de odihnă. Fă doar mobilitate ușoară dacă te simți bine.");
   el.appendChild(b);
  })
 }
@@ -277,7 +301,7 @@ function renderHistory(){
  const h=history(),ratings=h.map(x=>x.rating).filter(Boolean),avg=ratings.length?(ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1):"—",best=ratings.length?Math.max(...ratings):"—";
  document.getElementById("avgRating").textContent=avg;document.getElementById("finishedCount").textContent=ratings.length;document.getElementById("bestRating").textContent=best;
  const el=document.getElementById("history");el.innerHTML="";
- h.slice().reverse().slice(0,8).forEach(x=>{const d=document.createElement("div");d.className="historyrow";d.innerHTML=`<span>${x.date} • ${x.day.replace("FULL BODY","FB").replace("GIMNASTICĂ + MOBILITATE","SKILL")}</span><b>${x.rating}/10</b>`;el.appendChild(d)})
+ h.slice().reverse().slice(0,8).forEach(x=>{const d=document.createElement("div");d.className="historyrow";d.innerHTML=`<span>${x.date} • ${x.day.replace("FULL BODY","FB").replace("GIMNASTICĂ + MOBILITATE","FB")}</span><b>${x.rating}/10</b>`;el.appendChild(d)})
 }
 render();renderGlobal();
 </script>
